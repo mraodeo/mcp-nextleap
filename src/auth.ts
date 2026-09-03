@@ -11,6 +11,17 @@ const TOKEN_PATH = path.join(process.cwd(), 'token.json');
  * Attempt to load credentials from Environment Variables (for Railway/Cloud)
  */
 function loadCredentialsFromEnv() {
+  // 1. Check for a single JSON string containing the full token.json content
+  if (process.env.GOOGLE_TOKEN_JSON) {
+    try {
+      const credentials = JSON.parse(process.env.GOOGLE_TOKEN_JSON);
+      return google.auth.fromJSON(credentials);
+    } catch (err) {
+      console.error('Error parsing GOOGLE_TOKEN_JSON environment variable:', err);
+    }
+  }
+
+  // 2. Fallback to individual variables
   const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REFRESH_TOKEN } = process.env;
   
   if (GOOGLE_CLIENT_ID && GOOGLE_CLIENT_SECRET && GOOGLE_REFRESH_TOKEN) {

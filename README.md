@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Google Workspace MCP Server
 
 This is a Model Context Protocol (MCP) server that enables AI agents (like Cursor, Antigravity, etc.) to interact with Google Workspace APIs. 
@@ -72,10 +73,10 @@ Add the following to your MCP configuration in Cursor (or similar settings):
 
 If you deploy this server to Railway or any other cloud provider, it will automatically switch to **Server-Sent Events (SSE)** mode (instead of local `stdio`) because it detects the `PORT` environment variable.
 
-1. **Environment Variables**: Configure the following variables in your Railway project instead of uploading `credentials.json` or `token.json`:
-   - `GOOGLE_CLIENT_ID`
-   - `GOOGLE_CLIENT_SECRET`
-   - `GOOGLE_REFRESH_TOKEN`
+1. **Environment Variables**: Configure the following variable in your Railway project instead of uploading `token.json` directly:
+   - `GOOGLE_TOKEN_JSON`: Paste the entire JSON content from your local `token.json` file into this variable.
+   
+   *(Alternatively, you can provide `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and `GOOGLE_REFRESH_TOKEN` as separate variables).*
 2. **Connecting Remotely**: In your remote AI Agent (like Antigravity), point the SSE connection to:
    `https://your-app.up.railway.app/sse`
 
@@ -88,3 +89,6 @@ If you deploy this server to Railway or any other cloud provider, it will automa
 ## Security
 
 **Do NOT commit your `credentials.json` or `token.json` files to version control.** They provide full access to your Gmail and Google Docs. Use Environment Variables for production deployments.
+=======
+# mcp-nextleap
+>>>>>>> 3fe8f1d1e07f168847f19cb6ef2a62150dd7059f
