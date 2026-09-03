@@ -1,0 +1,8 @@
+google-play-scraper
+langchain
+langchain-core
+langchain-groq
+pydantic
+python-dotenv
+langdetect
+mcp
