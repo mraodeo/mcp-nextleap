@@ -1,0 +1,7 @@
+node_modules/
+build/
+credentials.json
+Credentials.json
+token.json
+.env
+.DS_Store
