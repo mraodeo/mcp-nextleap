@@ -46,10 +46,12 @@ class OrchestratorOutput(TypedDict):
     discrepancy_flag: bool
     discrepancy_details: Optional[str]
 
-class ReviewerOutput(TypedDict):
+class ReviewerOutput(TypedDict, total=False):
     passed: bool
+    status: str
     failure_reasons: List[str]
     review_attempt: int
+    checks: Dict[str, bool]
 
 class AgentGraphState(TypedDict):
     # Inputs & Sanitization

@@ -80,13 +80,20 @@ def route_reviewer(state: AgentGraphState) -> Literal["human_review", "orchestra
 def parse_refinement_intent(feedback: str) -> Literal["orchestrator", "facts", "pattern"]:
     """
     Parses human reviewer feedback to route ONLY to affected agents.
+    Supports English and Hinglish operational keywords.
     """
     feedback_lower = feedback.lower()
-    if any(k in feedback_lower for k in ["short", "shorter", "concise", "rephrase", "tone", "word", "length"]):
+    if any(k in feedback_lower for k in ["short", "shorter", "concise", "rephrase", "tone", "word", "length", "chhota", "polite"]):
         return "orchestrator"
-    elif any(k in feedback_lower for k in ["scheme", "fund", "hdfc", "exit load", "nav", "tax", "load", "different scheme"]):
+    elif any(k in feedback_lower for k in [
+        "scheme", "fund", "hdfc", "exit load", "nav", "tax", "load", "different scheme",
+        "stamp duty", "clause", "galat", "sahi", "check karo"
+    ]):
         return "facts"
-    elif any(k in feedback_lower for k in ["pattern", "theme", "review", "trend", "fee issue", "frequency", "recurring"]):
+    elif any(k in feedback_lower for k in [
+        "pattern", "theme", "review", "trend", "fee issue", "frequency", "recurring",
+        "cluster", "complaints", "shikayat", "volume"
+    ]):
         return "pattern"
     return "orchestrator"
 

@@ -12,6 +12,7 @@ let isEditMode = false;
 document.addEventListener("DOMContentLoaded", () => {
     loadScenarios();
     setupKeyboardShortcuts();
+    setupDAGInteractions();
 });
 
 // ==============================================================================
@@ -41,6 +42,9 @@ function renderScenarioQueue(scenarios) {
         const item = document.createElement("div");
         item.className = "scenario-queue-item";
         item.id = `scenario-${sc.id}`;
+        item.setAttribute("role", "button");
+        item.setAttribute("tabindex", "0");
+        item.setAttribute("aria-label", `Select preset scenario: ${sc.name}`);
         item.innerHTML = `
             <div class="scenario-item-header">
                 <span class="badge badge-${sc.tag_color || 'emerald'}">${sc.tag}</span>
@@ -50,6 +54,12 @@ function renderScenarioQueue(scenarios) {
             <div class="scenario-item-query">${escapeHtml(sc.query)}</div>
         `;
         item.onclick = () => selectScenario(sc);
+        item.onkeydown = (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                selectScenario(sc);
+            }
+        };
         container.appendChild(item);
     });
 }
@@ -86,6 +96,47 @@ function clearInput() {
 // 2. INTERACTIVE SVG DAG VISUALIZATION
 // ==============================================================================
 
+function setupDAGInteractions() {
+    const nodeBindings = [
+        { id: "dag-node-sanitizer", tab: "pii", toast: "PII Guard: Regex & Statutory Redactor" },
+        { id: "dag-node-facts", tab: "evidence", toast: "Facts Specialist: Verified Scheme SIDs" },
+        { id: "dag-node-pattern", tab: "evidence", toast: "Pattern Specialist: Voice-of-Customer Clusters" },
+        { id: "dag-node-compliance", tab: "compliance", toast: "Compliance Specialist: SEBI Zero-Advice Gate" },
+        { id: "dag-node-reviewer", tab: "compliance", toast: "Reviewer Quality Gate: 5 Checkpoints" },
+        { id: "dag-node-orchestrator", tab: null, action: () => {
+            document.querySelector(".channel-a-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            showToast("Orchestrator: Dual-Channel Synthesis");
+        }},
+        { id: "dag-node-mcp", tab: null, action: () => {
+            document.querySelector(".hitl-mcp-card")?.scrollIntoView({ behavior: "smooth", block: "center" });
+            showToast("MCP Gate: Approval Barrier");
+        }}
+    ];
+
+    nodeBindings.forEach(binding => {
+        const el = document.getElementById(binding.id);
+        if (el) {
+            el.style.cursor = "pointer";
+            el.setAttribute("role", "button");
+            el.setAttribute("tabindex", "0");
+            el.onclick = () => {
+                if (binding.tab) {
+                    switchInspectorTab(binding.tab);
+                    if (binding.toast) showToast(binding.toast);
+                } else if (binding.action) {
+                    binding.action();
+                }
+            };
+            el.onkeydown = (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    el.onclick();
+                }
+            };
+        }
+    });
+}
+
 function resetDAG() {
     document.querySelectorAll(".dag-node").forEach(n => n.classList.remove("active"));
     document.querySelectorAll(".dag-edge").forEach(e => e.classList.remove("active"));
@@ -95,6 +146,9 @@ function resetDAG() {
 }
 
 function animateDAGStep(step) {
+    const pulse = document.getElementById("dag-pulse");
+    if (pulse) pulse.classList.remove("hidden");
+
     // Step 0: Sanitizer
     if (step >= 0) {
         document.getElementById("dag-node-sanitizer")?.classList.add("active");
@@ -332,9 +386,10 @@ function renderRoutingNote(routingText, orchestrator) {
     const banner = document.getElementById("discrepancy-banner");
     const bannerText = document.getElementById("discrepancy-text");
 
-    if (orchestrator && orchestrator.discrepancy_detected) {
+    const hasDiscrepancy = Boolean(orchestrator && (orchestrator.discrepancy_flag || orchestrator.discrepancy_detected));
+    if (hasDiscrepancy) {
         banner.classList.remove("hidden");
-        bannerText.textContent = orchestrator.discrepancy_explanation || 
+        bannerText.textContent = orchestrator.discrepancy_details || orchestrator.discrepancy_explanation || 
             "Conflict detected between user complaint and verified scheme disclosures. Escalated for human verification.";
     } else {
         banner.classList.add("hidden");
@@ -344,7 +399,7 @@ function renderRoutingNote(routingText, orchestrator) {
     const priorityBadge = document.getElementById("routing-priority-badge");
     const teamBadge = document.getElementById("routing-team-badge");
 
-    if (routingText.includes("URGENT") || routingText.includes("CRITICAL") || orchestrator?.discrepancy_detected) {
+    if (routingText.includes("URGENT") || routingText.includes("CRITICAL") || hasDiscrepancy || orchestrator?.priority === "P1-High") {
         priorityBadge.className = "badge badge-rose";
         priorityBadge.textContent = "P1 - Critical";
     } else {
@@ -492,13 +547,19 @@ async function submitRefinement() {
 // --- RIGHT INSPECTOR (PII, EVIDENCE, COMPLIANCE, TRACE) ---
 
 function switchInspectorTab(tabId) {
-    document.querySelectorAll(".insp-tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".insp-tab").forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+    });
     document.querySelectorAll(".insp-panel").forEach(p => p.classList.remove("active"));
 
     const tabBtn = Array.from(document.querySelectorAll(".insp-tab")).find(t => 
-        t.getAttribute("onclick")?.includes(tabId)
+        t.getAttribute("onclick")?.includes(tabId) || t.id === `tab-insp-${tabId}`
     );
-    if (tabBtn) tabBtn.classList.add("active");
+    if (tabBtn) {
+        tabBtn.classList.add("active");
+        tabBtn.setAttribute("aria-selected", "true");
+    }
 
     const panel = document.getElementById(`insp-panel-${tabId}`);
     if (panel) panel.classList.add("active");
@@ -534,8 +595,8 @@ function renderInspector(state) {
         factsStatus.className = "badge badge-emerald";
         factsStatus.textContent = "COVERED";
         factsScheme.textContent = facts.scheme_name || "—";
-        factsSection.textContent = facts.section_matched || "—";
-        factsExtracted.textContent = facts.extracted_clause || "—";
+        factsSection.textContent = facts.section_title || facts.section_matched || "—";
+        factsExtracted.textContent = facts.extracted_text || facts.extracted_clause || "—";
         factsCitation.textContent = facts.source_url || "No URL";
         factsCitation.href = facts.source_url || "#";
     } else {
@@ -556,34 +617,48 @@ function renderInspector(state) {
     const patternWindow = document.getElementById("pattern-window");
 
     if (pattern) {
+        const hasTheme = Boolean(pattern.theme_name || pattern.theme);
         patternStatus.className = "badge badge-indigo";
-        patternStatus.textContent = pattern.theme ? "MATCHED" : "NO CLUSTER";
-        patternTheme.textContent = pattern.theme ? pattern.theme.replace(/_/g, " ").toUpperCase() : "None";
-        patternCount.textContent = `${pattern.cluster_count || 0} reviews in cluster`;
-        patternFreq.textContent = pattern.frequency_status || "Standard";
-        patternWindow.textContent = pattern.historical_window || "25-Jun-2026";
+        patternStatus.textContent = hasTheme ? "MATCHED" : "NO CLUSTER";
+        patternTheme.textContent = pattern.theme_name || (pattern.theme ? pattern.theme.replace(/_/g, " ").toUpperCase() : "None");
+        const rCount = pattern.review_count !== undefined ? pattern.review_count : (pattern.cluster_count !== undefined ? pattern.cluster_count : 0);
+        patternCount.textContent = `${rCount} reviews in cluster`;
+        patternFreq.textContent = pattern.status || pattern.frequency_status || "Standard";
+        patternWindow.textContent = pattern.review_window || pattern.historical_window || "25-Jun-2026";
     }
 
     // 3. Compliance & Reviewer Gate Tab
     const comp = state.compliance;
-    updateCheckItem("comp-check-advice", comp ? !comp.advice_detected : true);
-    updateCheckItem("comp-check-perf", comp ? !comp.performance_claim_detected : true);
-    updateCheckItem("comp-check-pii", comp ? !comp.pii_leakage_detected : true);
+    const noAdvice = comp ? (comp.incoming_has_advice !== undefined ? !comp.incoming_has_advice : !comp.advice_detected) : true;
+    const noPerf = comp ? (comp.incoming_has_performance_claim !== undefined ? !comp.incoming_has_performance_claim : !comp.performance_claim_detected) : true;
+    const noPii = comp ? (comp.pii_detected !== undefined ? !comp.pii_detected : !comp.pii_leakage_detected) : true;
+    updateCheckItem("comp-check-advice", noAdvice);
+    updateCheckItem("comp-check-perf", noPerf);
+    updateCheckItem("comp-check-pii", noPii);
 
     const reviewer = state.reviewer;
     const reviewerBadge = document.getElementById("reviewer-status-badge");
     const checksList = document.getElementById("reviewer-checks-list");
 
     if (reviewer) {
-        reviewerBadge.className = `badge badge-${reviewer.status === 'PASS' ? 'emerald' : 'rose'}`;
-        reviewerBadge.textContent = reviewer.status;
+        const isPass = Boolean(reviewer.status === 'PASS' || reviewer.passed === true);
+        reviewerBadge.className = `badge badge-${isPass ? 'emerald' : 'rose'}`;
+        reviewerBadge.textContent = reviewer.status || (isPass ? 'PASS' : 'FAIL');
+
+        const checks = reviewer.checks || {
+            no_advice_violation: !reviewer.failure_reasons?.some(r => r.toLowerCase().includes("advice")),
+            has_grounded_timestamp: !reviewer.failure_reasons?.some(r => r.toLowerCase().includes("verification date")),
+            has_single_source_link: !reviewer.failure_reasons?.some(r => r.toLowerCase().includes("citation")),
+            within_sentence_limit: !reviewer.failure_reasons?.some(r => r.toLowerCase().includes("exceeds")),
+            no_pii_leakage: !reviewer.failure_reasons?.some(r => r.toLowerCase().includes("pii"))
+        };
 
         const rules = [
-            { label: "SEBI Advice Deflection", pass: reviewer.checks?.no_advice_violation },
-            { label: "Verified 25-Jun-2026 Grounding", pass: reviewer.checks?.has_grounded_timestamp },
-            { label: "Single Citation Link Present", pass: reviewer.checks?.has_single_source_link },
-            { label: "Strict ≤3 Sentence Cap", pass: reviewer.checks?.within_sentence_limit },
-            { label: "Zero PII Leakage", pass: reviewer.checks?.no_pii_leakage }
+            { label: "SEBI Advice Deflection", pass: checks.no_advice_violation },
+            { label: "Verified 25-Jun-2026 Grounding", pass: checks.has_grounded_timestamp },
+            { label: "Single Citation Link Present", pass: checks.has_single_source_link },
+            { label: "Strict ≤3 Sentence Cap", pass: checks.within_sentence_limit },
+            { label: "Zero PII Leakage", pass: checks.no_pii_leakage }
         ];
 
         checksList.innerHTML = rules.map(r => `
@@ -666,11 +741,19 @@ function setupKeyboardShortcuts() {
 // ==============================================================================
 
 function switchTab(tabId) {
-    document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".nav-tab").forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+    });
     document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
 
-    document.getElementById(`tab-${tabId}`).classList.add("active");
-    document.getElementById(`view-${tabId}`).classList.add("active");
+    const activeBtn = document.getElementById(`tab-${tabId}`);
+    if (activeBtn) {
+        activeBtn.classList.add("active");
+        activeBtn.setAttribute("aria-selected", "true");
+    }
+    const activePanel = document.getElementById(`view-${tabId}`);
+    if (activePanel) activePanel.classList.add("active");
 }
 
 async function triggerBenchmark() {
@@ -710,33 +793,60 @@ function renderBenchmarkResults(data) {
     const tbody = document.getElementById("benchmark-table-body");
     const scorecard = data.scorecard || {};
 
+    const complianceRate = scorecard.compliance_safety_rate !== undefined ? 
+        scorecard.compliance_safety_rate : 
+        (100.0 - (scorecard.Advice_Violation_Rate || 0)) / 100.0;
+
+    const piiRate = scorecard.pii_protection_rate !== undefined ?
+        scorecard.pii_protection_rate :
+        (100.0 - (scorecard.PII_Leakage_Rate || 0)) / 100.0;
+
+    const timestampRate = scorecard.verification_date_grounding_rate !== undefined ?
+        scorecard.verification_date_grounding_rate :
+        (scorecard.Timestamp_Compliance_Rate !== undefined ? scorecard.Timestamp_Compliance_Rate / 100.0 : 1.0);
+
+    const citationRate = scorecard.source_citation_presence_rate !== undefined ?
+        scorecard.source_citation_presence_rate :
+        (scorecard.Citation_Precision !== undefined ? scorecard.Citation_Precision / 100.0 : 1.0);
+
+    const sentenceRate = scorecard.sentence_cap_adherence_rate !== undefined ?
+        scorecard.sentence_cap_adherence_rate :
+        (scorecard.Sentence_Budget_Compliance !== undefined ? scorecard.Sentence_Budget_Compliance / 100.0 : 1.0);
+
+    const discrepancyRate = scorecard.discrepancy_capture_rate !== undefined ?
+        scorecard.discrepancy_capture_rate :
+        (scorecard.Discrepancy_Recall !== undefined ? scorecard.Discrepancy_Recall / 100.0 : 1.0);
+
+    const autoSendRate = scorecard.zero_auto_send_compliance !== undefined ?
+        scorecard.zero_auto_send_compliance : 1.0;
+
     scCards.innerHTML = `
         <div class="stat-card">
-            <span class="stat-val">${scorecard.total_runs || 40}</span>
+            <span class="stat-val">${data.total_runs || scorecard.total_runs || 40}</span>
             <span class="stat-label">Total Evaluated Scenarios</span>
         </div>
         <div class="stat-card">
-            <span class="stat-val">${formatPercent(scorecard.compliance_safety_rate)}</span>
+            <span class="stat-val">${formatPercent(complianceRate)}</span>
             <span class="stat-label">SEBI Zero-Advice Compliance</span>
         </div>
         <div class="stat-card">
-            <span class="stat-val">${formatPercent(scorecard.pii_protection_rate)}</span>
+            <span class="stat-val">${formatPercent(piiRate)}</span>
             <span class="stat-label">Zero-PII Leakage Rate</span>
         </div>
         <div class="stat-card">
-            <span class="stat-val">${formatPercent(scorecard.verification_date_grounding_rate)}</span>
+            <span class="stat-val">${formatPercent(timestampRate)}</span>
             <span class="stat-label">25-Jun-2026 Grounding Rate</span>
         </div>
     `;
 
     const metrics = [
-        { name: "SEBI Advice Deflection Rate", val: scorecard.compliance_safety_rate, target: "100.0%" },
-        { name: "Zero-PII Leakage Rate", val: scorecard.pii_protection_rate, target: "100.0%" },
-        { name: "Verification Date Grounding Rate", val: scorecard.verification_date_grounding_rate, target: "100.0%" },
-        { name: "Source Citation Grounding Rate", val: scorecard.source_citation_presence_rate, target: "100.0%" },
-        { name: "Draft ≤3 Sentence Cap Compliance", val: scorecard.sentence_cap_adherence_rate, target: "≥ 95.0%" },
-        { name: "Discrepancy Capture Rate", val: scorecard.discrepancy_capture_rate, target: "100.0%" },
-        { name: "Zero Autonomous SMTP Dispatch", val: scorecard.zero_auto_send_compliance, target: "100.0%" }
+        { name: "SEBI Advice Deflection Rate", val: complianceRate, target: "100.0%" },
+        { name: "Zero-PII Leakage Rate", val: piiRate, target: "100.0%" },
+        { name: "Verification Date Grounding Rate", val: timestampRate, target: "100.0%" },
+        { name: "Source Citation Grounding Rate", val: citationRate, target: "100.0%" },
+        { name: "Draft ≤3 Sentence Cap Compliance", val: sentenceRate, target: "≥ 95.0%" },
+        { name: "Discrepancy Capture Rate", val: discrepancyRate, target: "100.0%" },
+        { name: "Zero Autonomous SMTP Dispatch", val: autoSendRate, target: "100.0%" }
     ];
 
     tbody.innerHTML = metrics.map(m => {
@@ -754,7 +864,11 @@ function renderBenchmarkResults(data) {
 
 function formatPercent(val) {
     if (val === undefined || val === null) return "100.0%";
-    return `${(val * 100).toFixed(1)}%`;
+    const num = Number(val);
+    if (num <= 1.0 && num >= 0.0) {
+        return `${(num * 100).toFixed(1)}%`;
+    }
+    return `${num.toFixed(1)}%`;
 }
 
 // ==============================================================================

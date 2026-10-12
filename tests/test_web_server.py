@@ -64,3 +64,36 @@ def test_web_approve_ticket():
     assert app_data["status"] == "success"
     assert app_data["email_draft"]["payload"]["auto_send"] is False
     assert app_data["email_draft"]["payload"]["status"] == "DRAFT"
+
+def test_web_reviewer_checks_and_discrepancy_schema():
+    res = client.post("/api/process", json={"raw_input": "Why was exit load charged on HDFC Large Cap Fund Direct Growth?"})
+    assert res.status_code == 200
+    state = res.json()["state"]
+    # Verify Reviewer contract
+    rev = state["reviewer"]
+    assert rev["passed"] is True
+    assert rev["status"] == "PASS"
+    assert "checks" in rev
+    assert rev["checks"]["no_advice_violation"] is True
+    assert rev["checks"]["has_grounded_timestamp"] is True
+    assert rev["checks"]["within_sentence_limit"] is True
+    assert rev["checks"]["no_pii_leakage"] is True
+
+    # Verify Discrepancy flag
+    orch = state["orchestrator"]
+    assert "discrepancy_flag" in orch
+    assert "target_team" in orch
+    assert "priority" in orch
+
+def test_web_benchmark_schema():
+    res = client.get("/api/benchmark")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "success"
+    assert data["total_runs"] >= 5
+    scorecard = data["scorecard"]
+    assert "compliance_safety_rate" in scorecard
+    assert "pii_protection_rate" in scorecard
+    assert "verification_date_grounding_rate" in scorecard
+    assert scorecard["compliance_safety_rate"] == 1.0
+    assert scorecard["pii_protection_rate"] == 1.0

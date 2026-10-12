@@ -52,9 +52,9 @@
                 <span class="kbd">E</span> Edit &middot;
                 <span class="kbd">R</span> Refine
             </div>
-            <nav class="nav-tabs">
-                <button id="tab-console" class="nav-tab active" onclick="switchTab('console')">Operations Cockpit</button>
-                <button id="tab-benchmark" class="nav-tab" onclick="switchTab('benchmark')">Audit & Benchmark</button>
+            <nav class="nav-tabs" role="tablist" aria-label="Portal Navigation">
+                <button id="tab-console" class="nav-tab active" role="tab" aria-selected="true" aria-controls="view-console" onclick="switchTab('console')">Operations Cockpit</button>
+                <button id="tab-benchmark" class="nav-tab" role="tab" aria-selected="false" aria-controls="view-benchmark" onclick="switchTab('benchmark')">Audit & Benchmark</button>
             </nav>
         </div>
     </header>
@@ -366,12 +366,11 @@
                         <span id="inspector-badge" class="badge badge-emerald">Live</span>
                     </div>
 
-                    <!-- Inspector Tabs -->
-                    <div class="inspector-tabs">
-                        <button class="insp-tab active" onclick="switchInspectorTab('pii')">PII Guard</button>
-                        <button class="insp-tab" onclick="switchInspectorTab('evidence')">Evidence</button>
-                        <button class="insp-tab" onclick="switchInspectorTab('compliance')">SEBI Gate</button>
-                        <button class="insp-tab" onclick="switchInspectorTab('trace')">Event Trace</button>
+                    <div class="inspector-tabs" role="tablist" aria-label="Inspector Panels">
+                        <button id="tab-insp-pii" class="insp-tab active" role="tab" aria-selected="true" aria-controls="insp-panel-pii" onclick="switchInspectorTab('pii')">PII Guard</button>
+                        <button id="tab-insp-evidence" class="insp-tab" role="tab" aria-selected="false" aria-controls="insp-panel-evidence" onclick="switchInspectorTab('evidence')">Evidence</button>
+                        <button id="tab-insp-compliance" class="insp-tab" role="tab" aria-selected="false" aria-controls="insp-panel-compliance" onclick="switchInspectorTab('compliance')">SEBI Gate</button>
+                        <button id="tab-insp-trace" class="insp-tab" role="tab" aria-selected="false" aria-controls="insp-panel-trace" onclick="switchInspectorTab('trace')">Event Trace</button>
                     </div>
 
                     <div class="inspector-content">

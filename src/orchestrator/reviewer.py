@@ -67,12 +67,30 @@ def reviewer_node(state: AgentGraphState) -> Dict[str, Any]:
         if not source_url or source_url not in draft:
             failures.append("Factual scheme claim missing canonical source_url citation link")
 
+    no_pii_leakage = not pii_check["has_pii"]
+    has_advice_violation = any(re.search(pattern, draft, re.IGNORECASE) for pattern in BANNED_ADVICE_WORDS)
+    within_sentence_limit = (num_sentences <= MAX_REPLY_SENTENCES)
+    has_grounded_timestamp = (CANONICAL_NAV_DATE in draft)
+    if facts and facts.get("status") == "covered":
+        source_url = facts.get("source_url")
+        has_single_source_link = bool(source_url and source_url in draft)
+    else:
+        has_single_source_link = True
+
     passed = len(failures) == 0
 
     reviewer_output: ReviewerOutput = {
         "passed": passed,
+        "status": "PASS" if passed else "FAIL",
         "failure_reasons": failures,
-        "review_attempt": rework_count + 1
+        "review_attempt": rework_count + 1,
+        "checks": {
+            "no_advice_violation": not has_advice_violation,
+            "has_grounded_timestamp": has_grounded_timestamp,
+            "has_single_source_link": has_single_source_link,
+            "within_sentence_limit": within_sentence_limit,
+            "no_pii_leakage": no_pii_leakage
+        }
     }
 
     return {"reviewer": reviewer_output, "fired_agents_log": ["reviewer"]}
