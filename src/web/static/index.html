@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groww Multi-Agent Operations Portal | Compliance-Hardened Support</title>
+    <!-- Modern Typography: Plus Jakarta Sans & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="theme-dark">
+    <!-- TOP NAVIGATION -->
+    <header class="app-header">
+        <div class="brand-container">
+            <div class="brand-logo">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <circle cx="14" cy="14" r="14" fill="#00D09C" fill-opacity="0.15"/>
+                    <path d="M7 15L12 20L21 8" stroke="#00D09C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <div class="pulse-indicator"></div>
+            </div>
+            <div class="brand-text">
+                <h1>Groww <span>Multi-Agent Operations</span></h1>
+                <p>SEBI-Compliant Dual-Channel Support Reply & Routing System</p>
+            </div>
+        </div>
+
+        <div class="system-status-bar">
+            <div class="status-pill status-pill--online">
+                <span class="status-dot"></span> System Live
+            </div>
+            <div class="status-pill">
+                <span class="icon">📅</span> NAV: <strong>25-Jun-2026</strong>
+            </div>
+            <div class="status-pill">
+                <span class="icon">🛡️</span> Zero-Advice Gate: <strong>Enforced</strong>
+            </div>
+            <div class="status-pill">
+                <span class="icon">🔒</span> Auto-Send: <strong>Disabled (Zero-SMTP)</strong>
+            </div>
+        </div>
+
+        <nav class="nav-tabs">
+            <button id="tab-console" class="nav-tab active" onclick="switchTab('console')">Ticket Console</button>
+            <button id="tab-benchmark" class="nav-tab" onclick="switchTab('benchmark')">Audit & Benchmark</button>
+        </nav>
+    </header>
+
+    <main class="app-main">
+        <!-- TAB 1: TICKET CONSOLE -->
+        <div id="view-console" class="view-panel active">
+            
+            <!-- QUICK SCENARIOS BAR -->
+            <section class="scenarios-section">
+                <div class="section-label">
+                    <span>⚡ Quick Test Scenarios</span>
+                    <span class="sub-label">Click any branch to load instant verified ticket payload</span>
+                </div>
+                <div id="scenarios-pills" class="scenarios-grid">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </section>
+
+            <!-- TICKET INPUT & GRAPH WORKFLOW PIPELINE -->
+            <section class="console-grid">
+                
+                <!-- INPUT CARD -->
+                <div class="glass-card input-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="badge badge-emerald">Step 1</span>
+                            <h2>Incoming Customer Complaint</h2>
+                        </div>
+                        <button id="btn-clear" class="btn-ghost" onclick="clearInput()">Clear</button>
+                    </div>
+
+                    <div class="input-container">
+                        <textarea id="ticket-input" rows="4" placeholder="Enter customer query or complaint (e.g. Why was I charged an exit load on HDFC Large Cap Fund? My PAN is ABCDE1234F)..."></textarea>
+                    </div>
+
+                    <div class="action-footer">
+                        <button id="btn-submit" class="btn btn-primary" onclick="submitTicket()">
+                            <span class="btn-text">Execute Multi-Agent Pipeline</span>
+                            <span class="btn-spinner hidden"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PIPELINE STEPPER VISUALIZER -->
+                <div class="glass-card pipeline-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="badge badge-indigo">Graph State</span>
+                            <h2>LangGraph Multi-Agent Flow</h2>
+                        </div>
+                        <div id="flow-execution-time" class="text-muted text-mono">Awaiting Execution</div>
+                    </div>
+
+                    <div class="pipeline-stepper" id="pipeline-stepper">
+                        <div class="step-node" id="node-sanitizer">
+                            <div class="node-icon">🔒</div>
+                            <div class="node-label">1. PII Redactor</div>
+                            <div class="node-status">Deterministic</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-node" id="node-specialists">
+                            <div class="node-icon">⚡</div>
+                            <div class="node-label">2. Fan-Out (3 Agents)</div>
+                            <div class="node-status">Parallel</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-node" id="node-orchestrator">
+                            <div class="node-icon">🧠</div>
+                            <div class="node-label">3. Fan-In Synthesizer</div>
+                            <div class="node-status">Dual-Channel</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-node" id="node-reviewer">
+                            <div class="node-icon">⚖️</div>
+                            <div class="node-label">4. Reviewer Gate</div>
+                            <div class="node-status">Guardrail</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-node" id="node-hitl">
+                            <div class="node-icon">👤</div>
+                            <div class="node-label">5. Human Approval</div>
+                            <div class="node-status">Gate Check</div>
+                        </div>
+                        <div class="step-connector"></div>
+                        <div class="step-node" id="node-mcp">
+                            <div class="node-icon">🚀</div>
+                            <div class="node-label">6. MCP Dispatch</div>
+                            <div class="node-status">Doc & Draft</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RESULTS WORKBENCH (HIDDEN UNTIL PROCESSED) -->
+            <div id="results-workbench" class="workbench hidden">
+                
+                <!-- ROW 1: PII INSPECTION -->
+                <section class="glass-card pii-card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <span class="badge badge-rose">Zero-Retention PII Engine</span>
+                            <h2>Pre-Graph Data Sanitization</h2>
+                        </div>
+                        <div id="pii-badge-container"></div>
+                    </div>
+                    <div class="pii-comparison-grid">
+                        <div class="pii-box pii-box--raw">
+                            <div class="box-title">Raw Incoming Input</div>
+                            <div id="pii-raw-text" class="box-content text-mono"></div>
+                        </div>
+                        <div class="pii-box pii-box--sanitized">
+                            <div class="box-title">Sanitized Graph Input (Passed to Model Prompts & Logs)</div>
+                            <div id="pii-sanitized-text" class="box-content text-mono"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ROW 2: PARALLEL SPECIALIST FAN-OUT CARDS (3 COLUMNS) -->
+                <section class="specialists-grid">
+                    <!-- FACTS AGENT -->
+                    <div class="glass-card specialist-card" id="card-facts">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="badge badge-emerald">Parallel Node 1</span>
+                                <h3>Facts Specialist</h3>
+                            </div>
+                            <span id="facts-status-badge" class="badge"></span>
+                        </div>
+                        <div class="specialist-body">
+                            <div class="data-row">
+                                <span class="data-label">Scheme Matched:</span>
+                                <span id="facts-scheme" class="data-value font-semibold"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Section:</span>
+                                <span id="facts-section" class="data-value"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Extracted Term:</span>
+                                <div id="facts-extracted" class="quote-box"></div>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Verified Citation:</span>
+                                <a id="facts-citation" href="#" target="_blank" class="citation-link text-truncate"></a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PATTERN AGENT -->
+                    <div class="glass-card specialist-card" id="card-pattern">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="badge badge-indigo">Parallel Node 2</span>
+                                <h3>Pattern Specialist</h3>
+                            </div>
+                            <span id="pattern-status-badge" class="badge"></span>
+                        </div>
+                        <div class="specialist-body">
+                            <div class="data-row">
+                                <span class="data-label">Feedback Theme:</span>
+                                <span id="pattern-theme" class="data-value font-semibold"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Reviews in Cluster:</span>
+                                <span id="pattern-count" class="data-value metric-pill"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Dataset Window:</span>
+                                <span id="pattern-window" class="data-value text-mono text-xs"></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Frequency Status:</span>
+                                <span id="pattern-frequency" class="data-value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- COMPLIANCE AGENT -->
+                    <div class="glass-card specialist-card" id="card-compliance">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="badge badge-purple">Parallel Node 3</span>
+                                <h3>Compliance Specialist</h3>
+                            </div>
+                            <span id="compliance-status-badge" class="badge"></span>
+                        </div>
+                        <div class="specialist-body">
+                            <div class="compliance-checklist">
+                                <div class="check-item" id="comp-check-advice">
+                                    <span class="check-icon"></span>
+                                    <div class="check-label">
+                                        <strong>Advice Solicitation</strong>
+                                        <p class="text-xs">Blocks buy/sell recommendations</p>
+                                    </div>
+                                </div>
+                                <div class="check-item" id="comp-check-perf">
+                                    <span class="check-icon"></span>
+                                    <div class="check-label">
+                                        <strong>Return Guarantees</strong>
+                                        <p class="text-xs">Blocks profit claims & return promises</p>
+                                    </div>
+                                </div>
+                                <div class="check-item" id="comp-check-pii">
+                                    <span class="check-icon"></span>
+                                    <div class="check-label">
+                                        <strong>Zero PII Propagation</strong>
+                                        <p class="text-xs">Ensures clean downstream state</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ROW 3: ORCHESTRATOR DUAL-CHANNEL SYNTHESIS -->
+                <section class="orchestrator-grid">
+                    
+                    <!-- CHANNEL A: CUSTOMER REPLY DRAFT -->
+                    <div class="glass-card deliverable-card channel-a-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="badge badge-emerald">Channel A</span>
+                                <h3>Customer Support Reply Draft</h3>
+                            </div>
+                            <div class="header-actions">
+                                <span id="draft-sentence-pill" class="pill pill-outline"></span>
+                                <span id="draft-date-pill" class="pill pill-outline"></span>
+                                <button id="btn-copy-draft" class="btn-copy" onclick="copyDraft()">Copy</button>
+                            </div>
+                        </div>
+
+                        <div class="draft-body">
+                            <div id="reply-draft-text" class="reply-content"></div>
+                        </div>
+
+                        <div class="draft-footer">
+                            <span class="text-xs text-muted">Strict Grounding: Verified public disclosures only (Zero Speculation).</span>
+                        </div>
+                    </div>
+
+                    <!-- CHANNEL B: INTERNAL OPS ROUTING NOTE -->
+                    <div class="glass-card deliverable-card channel-b-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="badge badge-indigo">Channel B</span>
+                                <h3>Internal Incident Routing Note</h3>
+                            </div>
+                            <div class="header-actions">
+                                <span id="routing-priority-badge" class="badge"></span>
+                                <span id="routing-team-badge" class="badge"></span>
+                            </div>
+                        </div>
+
+                        <div id="discrepancy-banner" class="discrepancy-banner hidden">
+                            <div class="banner-icon">⚠️</div>
+                            <div class="banner-content">
+                                <strong>DISCREPANCY PROTOCOL TRIGGERED:</strong>
+                                <p id="discrepancy-text"></p>
+                            </div>
+                        </div>
+
+                        <div class="routing-body">
+                            <pre id="routing-note-text" class="routing-pre text-mono"></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ROW 4: REVIEWER GUARDRAIL & HITL APPROVAL BARRIER -->
+                <section class="governance-grid">
+                    
+                    <!-- REVIEWER GUARDRAIL CARD -->
+                    <div class="glass-card reviewer-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="badge badge-amber">Automated Guardrail</span>
+                                <h3>Reviewer Quality Gate</h3>
+                            </div>
+                            <span id="reviewer-status-badge" class="badge"></span>
+                        </div>
+
+                        <div class="reviewer-checklist" id="reviewer-checks-list">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
+                    <!-- HITL APPROVAL & MCP TOOL DISPATCH -->
+                    <div class="glass-card mcp-card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <span class="badge badge-emerald">Approval-Gated MCP</span>
+                                <h3>Human Authorization & Tool Dispatch</h3>
+                            </div>
+                            <span id="mcp-gate-status" class="status-indicator">Pending Approval</span>
+                        </div>
+
+                        <p class="text-sm text-muted">
+                            Financial Operations Constraint: External writes require explicit human click. Zero autonomous dispatch permitted.
+                        </p>
+
+                        <!-- APPROVAL ACTION CONTROLS -->
+                        <div class="approval-actions" id="approval-controls">
+                            <button id="btn-approve" class="btn btn-emerald" onclick="approveAndDispatch()">
+                                <span class="icon">✓</span> Approve & Dispatch MCP Actions
+                            </button>
+                            <button id="btn-toggle-refine" class="btn btn-outline" onclick="toggleRefineBox()">
+                                <span class="icon">✎</span> Request Refinement
+                            </button>
+                        </div>
+
+                        <!-- REFINEMENT EXPANDER -->
+                        <div id="refinement-container" class="refinement-box hidden">
+                            <label for="refine-feedback" class="text-xs text-muted">Enter modification feedback for selective specialist re-execution:</label>
+                            <div class="refine-input-row">
+                                <input type="text" id="refine-feedback" placeholder="e.g., Make the draft shorter, or check Mid Cap scheme terms...">
+                                <button id="btn-submit-refine" class="btn btn-indigo" onclick="submitRefinement()">Apply Refinement</button>
+                            </div>
+                            <div id="refine-counter" class="text-xs text-muted">Refinements used: 0 / 5</div>
+                        </div>
+
+                        <!-- DISPATCH EXECUTION RESULTS -->
+                        <div id="mcp-results-container" class="mcp-results hidden">
+                            <div class="mcp-item" id="mcp-doc-item">
+                                <div class="mcp-icon">📄</div>
+                                <div class="mcp-details">
+                                    <strong>MCP Tool: append_record_to_doc</strong>
+                                    <p class="text-xs text-muted">Appended draft, routing note, and canonical timestamp to central log.</p>
+                                </div>
+                                <span class="mcp-status-pill">SUCCESS</span>
+                            </div>
+                            <div class="mcp-item" id="mcp-email-item">
+                                <div class="mcp-icon">✉️</div>
+                                <div class="mcp-details">
+                                    <strong>MCP Tool: create_email_draft</strong>
+                                    <p class="text-xs text-muted">Created support ticket draft (Status: <strong>DRAFT</strong> | auto_send: <strong>False</strong>)</p>
+                                </div>
+                                <span class="mcp-status-pill">DRAFT CREATED</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- TAB 2: BENCHMARK & AUDIT VIEW -->
+        <div id="view-benchmark" class="view-panel">
+            <section class="benchmark-hero glass-card">
+                <div class="hero-header">
+                    <div>
+                        <h2>Comprehensive Compliance Benchmark Harness</h2>
+                        <p class="text-muted">Automated quantitative evaluation across the 5 Canonical Branches, 20-Review Real Play Store Benchmark, and 15 Adversarial Red-Team attacks.</p>
+                    </div>
+                    <button id="btn-run-benchmark" class="btn btn-primary" onclick="triggerBenchmark()">
+                        <span class="btn-text">Execute 40-Scenario Audit</span>
+                        <span class="btn-spinner hidden"></span>
+                    </button>
+                </div>
+
+                <div id="benchmark-results-container" class="benchmark-content hidden">
+                    <div class="scorecard-summary" id="scorecard-cards">
+                        <!-- Stat cards -->
+                    </div>
+
+                    <div class="scorecard-table-container glass-card">
+                        <h3>Detailed Regulatory Scorecard Table</h3>
+                        <table class="benchmark-table" id="benchmark-table">
+                            <thead>
+                                <tr>
+                                    <th>Evaluation Metric</th>
+                                    <th>Measured Score</th>
+                                    <th>Target Threshold</th>
+                                    <th>Release Gate Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="benchmark-table-body">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
